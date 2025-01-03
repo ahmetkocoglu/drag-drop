@@ -109,7 +109,6 @@ const changeProperties = (e: ChangeEvent<HTMLElement>) => {
            :id="sec.id"
            class="w-full border p-5"
            @drop="onDrop($event)" @dragover="allowDrop($event)">
-        {{ sec.id }}
         <div v-for="tool in list.filter((k: any) => k.section === sec.id)" :key="tool.id"
              class="my-2 bg-gray-100 relative group"
              @click="clickSelectedTool(tool)">
