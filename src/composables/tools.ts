@@ -99,25 +99,9 @@ const tools = [
     {
         id: idGenerator('field'),
         section: '',
-        title: 'Section 2 Column',
+        title: 'Column',
         icon: 'calendar',
-        type: '2-column',
-        style: defaultStyle,
-    },
-    {
-        id: idGenerator('field'),
-        section: '',
-        title: 'Section 3 Column',
-        icon: 'calendar',
-        type: '3-column',
-        style: defaultStyle,
-    },
-    {
-        id: idGenerator('field'),
-        section: '',
-        title: 'Section 4 Column',
-        icon: 'calendar',
-        type: '4-column',
+        type: 'column',
         style: defaultStyle,
     },
 ]
