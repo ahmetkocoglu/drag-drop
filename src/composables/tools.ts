@@ -6,12 +6,14 @@ const defaultStyle = {
     color: '#222222',
     borderColor: '#0000FF',
     borderRadius: '4px',
-    padding: '8px',
+    padding: '3',
+    margin: '0'
 }
 
 const tools = [
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Input Text',
         icon: 'pencil',
@@ -21,6 +23,7 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Input Number',
         icon: 'pencil',
@@ -30,6 +33,7 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Textarea',
         icon: 'file-text',
@@ -40,6 +44,7 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Select',
         icon: 'archive',
@@ -56,6 +61,7 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Checkbox',
         icon: 'checkbox',
@@ -65,6 +71,7 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Radio',
         icon: 'radio-button',
@@ -74,6 +81,7 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Datepicker',
         icon: 'calendar',
@@ -82,6 +90,7 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Color',
         icon: 'calendar',
@@ -90,6 +99,7 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Section',
         icon: 'calendar',
@@ -98,10 +108,20 @@ const tools = [
     },
     {
         id: idGenerator('field'),
+        value: '',
         section: '',
         title: 'Column',
         icon: 'calendar',
         type: 'column',
+        style: defaultStyle,
+    },
+    {
+        id: idGenerator('field'),
+        value: 'Submit',
+        section: '',
+        title: 'Button',
+        icon: 'calendar',
+        type: 'submit',
         style: defaultStyle,
     },
 ]

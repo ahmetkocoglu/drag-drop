@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {RouterLink, RouterView, useRoute, useRouter} from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
 
 const router = useRouter()
 const route = useRoute()

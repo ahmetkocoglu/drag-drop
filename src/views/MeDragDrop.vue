@@ -5,10 +5,15 @@ import Icon from "@/components/Icon.vue";
 import {ref} from "vue";
 import idGenerator from "@/composables/idGenerator.ts";
 import {RouterLink} from "vue-router";
+import Properties from "@/components/properties.vue";
+import TagRouting from "@/components/tag-routing.vue";
+import {useEditStore} from "@/stores/edit.ts";
+
+const store = useEditStore();
 
 const tags = ref(tools)
 
-const list = ref<any[]>([])
+const list = ref<any[]>(store.list)
 const selectedTool = ref<any>()
 
 const borderColor = ref('#ffffff')
@@ -22,25 +27,41 @@ const onDrag = (e: DragEvent | any, tool: any) => {
 
 const onDrop = (e: DragEvent | any) => {
   e.preventDefault()
-
   const domRect: HTMLElement = e.target as HTMLElement;
-  console.log('onDrop e >> ', domRect.id)
 
   const tool = JSON.parse(e.dataTransfer.getData("text/plain"))
-  // DragDropNewSection
+  selectedTool.value = tool
+
   if (tool.type === 'section') {
     list.value.push({...tool, id: idGenerator('section')})
+  } else if (tool.type === 'column') {
+    if (domRect.id.indexOf('section') > -1) {
+      const gridId = idGenerator('grid')
+      list.value = [...list.value, {...tool, id: gridId, section: e.target.id, type: 'grid'}]
+
+      list.value = [...list.value, {...tool, id: idGenerator('column'), section: gridId, type: 'column'}]
+    } else {
+      list.value = [...list.value, {
+        ...tool,
+        id: idGenerator('column'),
+        section: domRect.getAttribute('data-section'),
+        type: 'column'
+      }]
+    }
   } else if (domRect.id !== 'DragDropNewSection') {
     tool.id = idGenerator('tag')
-    if(domRect.id.indexOf('tag') > -1) {
+    if (domRect.id.indexOf('tag') > -1) {
       tool.section = domRect.getAttribute('data-section')
+      console.log('onDrop 1 >> ', domRect.tagName)
     } else {
       tool.section = e.target.id
+      console.log('onDrop 2 target id >> ', domRect.id)
     }
     list.value = [...list.value, tool]
+  } else {
+    console.log('onDrop >> not put', domRect.tagName)
   }
-
-  console.log('onDrop >> ', list.value)
+  console.log('onDrop >> list > value', list.value)
 }
 
 const onDropSub = (e: DragEvent | any) => {
@@ -62,6 +83,7 @@ function allowDropSub(ev: DragEvent) {
 }
 
 const clickSelectedTool = (tool: any) => {
+  console.log('clickSelectedTool >> ',tool)
   selectedTool.value = tool
   borderColor.value = tool.style.borderColor
   color.value = tool.style.color
@@ -69,28 +91,10 @@ const clickSelectedTool = (tool: any) => {
   placeholder.value = tool.placeholder
 }
 
-const changeProperties = (_e: Event) => {
-  const e = _e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-  list.value = list.value.map(tag => {
-    if (tag.id === selectedTool.value.id) {
-      if (e.id === 'color')
-        tag.style.color = e.value
-      else if (e.id === 'backgroundColor')
-        tag.style.backgroundColor = e.value
-      else if (e.id === 'borderColor')
-        tag.style.borderColor = e.value
-      else if (e.id === 'placeholder')
-        tag.placeholder = e.value
-    }
-    return tag
-  })
-}
-
 const sectionAllDelete = (section: any) => {
   list.value.splice(list.value.indexOf(section), 1)
 
   list.value = list.value.filter((e: any) => e.section !== section.id)
-  console.log(list.value, section.id)
 }
 </script>
 
@@ -115,95 +119,16 @@ const sectionAllDelete = (section: any) => {
          v-if="list.filter((k: any) => k.type === 'section' && k.section === '').length === 0"
          @drop="onDrop($event)" @dragover="allowDrop($event)">
     </div>
-    <div class="w-full mx-2 mt-10" v-else>
+    <div class="w-full mx-2 mt-7" v-else>
       <div id="DragDropBody" class="w-full">
         <div v-for="section in list.filter((k: any) => k.type === 'section' && k.section === '')"
              :key="section.id"
              :id="section.id"
-             class="w-full border p-5 relative group/section group-hover/section:bg-red-500"
+             class="w-full border p-1.5 min-h-10 relative group/section group-hover/section:bg-red-500"
              @drop="onDrop($event)" @dragover="allowDrop($event)">
           <div v-for="tool in list.filter((k: any) => k.section === section.id)" :key="tool.id"
-               class="my-2 bg-gray-100 relative group/tag"
-               @click="clickSelectedTool(tool)">
-            <div v-if="tool.type==='text'">
-              <label>{{ tool.title }}</label>
-              <input :id="tool.id"
-                     :data-section="tool.section"
-                     type="text"
-                     class="w-full border rounded-md"
-                     :style="`border-color: ${tool.style.borderColor}; color: ${tool.style.color}; background-color: ${tool.style.backgroundColor};`"
-                     :placeholder="tool.placeholder"/>
-            </div>
-            <div v-else-if="tool.type==='number'">
-              <label>{{ tool.title }}</label>
-              <input :id="tool.id"
-                     :data-section="tool.section" type="number"
-                     class="w-full border rounded-md"
-                     :style="`border-color: ${tool.style.borderColor}; color: ${tool.style.color}; background-color: ${tool.style.backgroundColor};`"
-                     :placeholder="tool.placeholder"/>
-            </div>
-            <div v-else-if="tool.type==='textarea'">
-              <label>{{ tool.title }}</label>
-              <textarea :id="tool.id"
-                        :data-section="tool.section" class="w-full border rounded-md"
-                        :style="`border-color: ${tool.style.borderColor}; color: ${tool.style.color}; background-color: ${tool.style.backgroundColor};`"
-                        :placeholder="tool.placeholder"
-              ></textarea>
-            </div>
-            <div v-else-if="tool.type==='select'">
-              <label>{{ tool.title }}</label>
-              <select class="w-full">
-                <option>chose 1</option>
-                <option>chose 2</option>
-              </select>
-            </div>
-            <div v-else-if="tool.type==='checkbox'">
-              <label>{{ tool.title }}</label>
-              <input :id="tool.id"
-                     :data-section="tool.section" type="checkbox" class="w-full"/>
-            </div>
-            <div v-else-if="tool.type==='radio'">
-              <label>{{ tool.title }}</label>
-              <input :id="tool.id"
-                     :data-section="tool.section" type="radio" class="w-full"/>
-            </div>
-            <div v-else-if="tool.type==='datetime-local'">
-              <label>{{ tool.title }}</label>
-              <input :id="tool.id"
-                     :data-section="tool.section" type="datetime-local"
-                     class="w-full border rounded-md"
-                     :style="`border-color: ${tool.style.borderColor}; color: ${tool.style.color}; background-color: ${tool.style.backgroundColor};`"
-                     :placeholder="tool.placeholder"/>
-            </div>
-            <div v-else-if="tool.type==='color'">
-              <label>{{ tool.title }}</label>
-              <input :id="tool.id"
-                     :data-section="tool.section" type="color"
-                     class="w-full border rounded-md"
-                     :style="`border-color: ${tool.style.borderColor}; color: ${tool.style.color}; background-color: ${tool.style.backgroundColor};`"
-                     :placeholder="tool.placeholder"/>
-            </div>
-            <div v-else-if="tool.type==='2-column'" class="w-full flex gap-2 border rounded-md p-5">
-              <div
-                  v-for="column in list.filter((k: any) => k.section === section.id).filter((k: any) => k.type.indexOf('column') > -1)"
-                  :key="column.id"
-                  :id="column.id"
-                  class="w-1/2 border rounded-md p-5"
-                  @drop="onDropSub($event)" @dragover="allowDropSub($event)">
-                <div v-for="item in column">
-                  <div v-if="item.type==='text'">
-                    <label>{{ item.title }}</label>
-                    <input type="text"
-                           class="w-full border rounded-md"
-                           :style="`border-color: ${item.style.borderColor}; color: ${item.style.color}; background-color: ${item.style.backgroundColor};`"
-                           :placeholder="item.placeholder"/>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else>
-
-            </div>
+               class="w-full my-2 relative group/tag"><!--@click="clickSelectedTool(tool)"-->
+            <TagRouting :model="tool" :list="list" @res="(e) => clickSelectedTool(e)"/>
             <Icon name="delete-bin"
                   class="absolute hidden top-0 group-hover/tag:-top-6 right-0 group-hover/tag:block group-hover/tag:text-red-500"
                   @click="list.splice(list.indexOf(tool), 1)"/>
@@ -218,33 +143,8 @@ const sectionAllDelete = (section: any) => {
         <span>new section</span>
       </div>
     </div>
-    <div class="w-80 flex flex-col gap-2">
-      <h1>Properties</h1>
-      <div>
-        <label>Border Color</label>
-        <input id="borderColor" type="color" class="w-full" v-model="borderColor" @change="changeProperties"/>
-      </div>
-      <div>
-        <label>Text Color</label>
-        <input id="color" type="color" class="w-full" v-model="color" @change="changeProperties"/>
-      </div>
-      <div>
-        <label>Background Color</label>
-        <input id="backgroundColor" type="color" class="w-full" v-model="backgroundColor" @change="changeProperties"/>
-      </div>
-      <div>
-        <label>Placeholder Color</label>
-        <input id="placeholder" type="text" class="w-full border rounded-md" v-model="placeholder"
-               @change="changeProperties"/>
-      </div>
-    </div>
+    <Properties v-if="selectedTool" v-model="selectedTool"/>
   </div>
-  <!--  <button id="btn" draggable="true" @dragstart="onDrag($event)">Ahmet</button>
-    <button draggable="true" @dragstart="onDrag($event)">Nilgün</button>-->
-  <!--  <div @drop="onDrop($event)" @dragover="allowDrop($event)" class="w-24 h-24 border border-gray-300">
-    </div>
-    <div @drop="onDrop($event)" @dragover="allowDrop($event)" class="w-24 h-24 border border-gray-300">
-    </div>-->
   <RouterLink to="/">Home</RouterLink>
 </template>
 
