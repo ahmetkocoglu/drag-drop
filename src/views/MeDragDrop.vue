@@ -146,6 +146,9 @@ const sectionAllDelete = (section: any) => {
     <Properties v-if="selectedTool" v-model="selectedTool"/>
   </div>
   <RouterLink to="/">Home</RouterLink>
+  <div class="w-full mt-7 container mx-auto border border-gray-200 p-3 rounded-md">
+    <pre></pre>
+  </div>
 </template>
 
 <style scoped>
